@@ -1,0 +1,1830 @@
+# BACKEND DEVELOPMENT INSTRUCTIONS FOR CLAUDE CODE
+## KAMFU Tech Website - Complete Backend Implementation Guide
+
+---
+
+## PROJECT OVERVIEW
+
+**Backend Framework:** FastAPI (Python 3.11+)  
+**Database:** PostgreSQL 15 (Production) / SQLite (Development)  
+**ORM:** SQLAlchemy 2.0 with Async Support  
+**Migration Tool:** Alembic  
+**Authentication:** JWT (Optional for admin)  
+**Email Service:** SendGrid / SMTP  
+**File Storage:** Local / S3-compatible  
+**API Documentation:** OpenAPI (Swagger) Auto-generated  
+**Testing:** Pytest + Pytest-Asyncio + Coverage  
+**Logging:** Structlog  
+**Monitoring:** Optional (Sentry)  
+**Containerization:** Docker + Docker Compose  
+
+---
+
+## 📐 CODE STANDARDS & CONVENTIONS
+
+### **CRITICAL: These rules MUST be followed for all backend code generation**
+
+### **📌 NAMING CONVENTION SUMMARY**
+| Item | Convention | Example |
+|------|-----------|---------|
+| Files | snake_case | `main.py`, `database.py`, `email_service.py` |
+| Folders | snake_case | `models`, `schemas`, `api`, `services` |
+| Functions | snake_case | `get_services()`, `create_contact()` |
+| Variables | snake_case | `user_data`, `is_active` |
+| Classes | PascalCase | `Service`, `ContactForm`, `DatabaseSession` |
+| Constants | SCREAMING_SNAKE_CASE | `API_BASE_URL`, `MAX_SIZE` |
+| Database Tables | snake_case | `services`, `case_studies`, `contacts` |
+| Database Columns | snake_case | `created_at`, `is_published` |
+| API Endpoints | kebab-case | `/api/v1/case-studies`, `/contact-form` |
+| Environment Variables | SCREAMING_SNAKE_CASE | `DATABASE_URL`, `SENDGRID_API_KEY` |
+
+---
+
+## PHASE 1: PROJECT SETUP & INITIALIZATION
+
+### Step 1.1: Create Project Structure
+```bash
+mkdir kamfu-backend
+cd kamfu-backend
+
+# Create complete folder structure
+mkdir -p app/{api/{v1/endpoints,deps.py},core,models,schemas,services,db,utils} tests/{api,services,integration} scripts alembic/versions
+```
+
+### Step 1.2: Initialize Python Environment
+```bash
+# Create virtual environment
+python3.11 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Upgrade pip
+pip install --upgrade pip
+```
+
+### Step 1.3: Install All Dependencies
+```bash
+# Create comprehensive requirements.txt
+cat > requirements.txt << EOF
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.25
+asyncpg==0.29.0
+alembic==1.13.1
+psycopg2-binary==2.9.9
+
+# Validation & Settings
+pydantic==2.5.3
+pydantic-settings==2.1.0
+email-validator==2.1.0
+
+# Security & Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# Email
+sendgrid==6.11.0
+aiosmtplib==3.0.1
+
+# File Storage
+boto3==1.34.34
+python-magic==0.4.27
+
+# Logging & Monitoring
+structlog==24.1.0
+sentry-sdk[fastapi]==1.40.0
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.26.0
+faker==22.6.0
+
+# Development Tools
+black==24.1.1
+flake8==7.0.0
+mypy==1.8.0
+isort==5.13.2
+pre-commit==3.6.0
+EOF
+
+# Install all dependencies
+pip install -r requirements.txt
+```
+
+### Step 1.4: Create Comprehensive .env File
+```bash
+cat > .env << EOF
+# =====================================================
+# KAMFU Tech Backend Configuration
+# =====================================================
+
+# Environment
+ENVIRONMENT=development
+DEBUG=true
+
+# API Configuration
+API_V1_STR=/api/v1
+PROJECT_NAME=KAMFU Tech API
+VERSION=1.0.0
+DESCRIPTION=Comprehensive AI and Technology Solutions API
+
+# CORS Configuration
+BACKEND_CORS_ORIGINS=["http://localhost:3000","http://localhost:5173","https://kamfu.com"]
+
+# Database Configuration
+DATABASE_URL=postgresql+asyncpg://kamfu_user:secure_password@localhost:5432/kamfu_db
+DATABASE_URL_SYNC=postgresql://kamfu_user:secure_password@localhost:5432/kamfu_db
+DATABASE_POOL_SIZE=20
+DATABASE_MAX_OVERFLOW=10
+
+# Redis (Optional - for caching)
+REDIS_URL=redis://localhost:6379/0
+
+# Email Configuration
+EMAIL_PROVIDER=sendgrid
+SENDGRID_API_KEY=your_sendgrid_api_key
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=noreply@kamfu.com
+SMTP_PASSWORD=your_smtp_password
+CONTACT_EMAIL=contact@kamfu.com
+ADMIN_EMAIL=admin@kamfu.com
+
+# File Storage Configuration
+STORAGE_TYPE=local
+AWS_ACCESS_KEY_ID=your_aws_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret
+AWS_S3_BUCKET=kamfu-assets
+AWS_REGION=ap-southeast-1
+
+# JWT Configuration (Optional for admin)
+SECRET_KEY=your-super-secret-key-change-in-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Admin Configuration
+ADMIN_EMAIL=admin@kamfu.com
+ADMIN_PASSWORD=ChangeMeInProduction123!
+ADMIN_FULL_NAME=Admin User
+
+# Rate Limiting
+RATE_LIMIT_PER_MINUTE=60
+
+# Monitoring
+SENTRY_DSN=your_sentry_dsn_here
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=logs/app.log
+EOF
+```
+
+### Step 1.5: Create .env.example (for documentation)
+```bash
+cp .env .env.example
+# Replace sensitive values with placeholders in .env.example
+```
+
+### Step 1.6: Create .gitignore
+```bash
+cat > .gitignore << EOF
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+EOF
+```
+
+---
+
+## PHASE 2: PROJECT STRUCTURE IMPLEMENTATION
+
+### Complete Project Structure
+```
+kamfu-backend/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                        # FastAPI app entry point
+│   │
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── deps.py                    # Dependencies (DB session, auth, etc.)
+│   │   └── v1/
+│   │       ├── __init__.py
+│   │       ├── router.py              # Main API router
+│   │       └── endpoints/
+│   │           ├── __init__.py
+│   │           ├── services.py        # /api/v1/services
+│   │           ├── case_studies.py    # /api/v1/case-studies
+│   │           ├── contact.py         # /api/v1/contact
+│   │           ├── about.py           # /api/v1/about
+│   │           ├── upload.py          # /api/v1/upload (file uploads)
+│   │           └── health.py          # /api/v1/health
+│   │
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py                  # Settings & configuration
+│   │   ├── security.py                # JWT & password hashing
+│   │   ├── logging.py                 # Logging configuration
+│   │   └── exceptions.py              # Custom exceptions
+│   │
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── base.py                    # Import all models
+│   │   ├── session.py                 # Database session & engine
+│   │   └── init_db.py                 # Database initialization & seeding
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── base.py                    # Base model with common fields
+│   │   ├── service.py                 # Service model
+│   │   ├── case_study.py              # Case Study model
+│   │   ├── contact.py                 # Contact model
+│   │   ├── about.py                   # About company model
+│   │   └── user.py                    # User model (optional for admin)
+│   │
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── service.py                 # Service Pydantic schemas
+│   │   ├── case_study.py              # Case Study schemas
+│   │   ├── contact.py                 # Contact schemas
+│   │   ├── about.py                   # About schemas
+│   │   ├── user.py                    # User schemas
+│   │   ├── response.py                # Generic API responses
+│   │   └── pagination.py              # Pagination schemas
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── email_service.py           # Email sending logic
+│   │   ├── storage_service.py         # File storage (S3/local)
+│   │   ├── notification_service.py    # Notifications
+│   │   └── cache_service.py           # Caching (Redis)
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       ├── validators.py              # Custom validators
+│       ├── helpers.py                 # Helper functions
+│       └── constants.py               # Application constants
+│
+├── alembic/
+│   ├── versions/
+│   ├── env.py
+│   └── script.py.mako
+│
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py                    # Test configuration
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── test_services.py
+│   │   ├── test_case_studies.py
+│   │   └── test_contact.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── test_email_service.py
+│   └── integration/
+│       ├── __init__.py
+│       └── test_full_flow.py
+│
+├── scripts/
+│   ├── seed_data.py                   # Seed database with initial data
+│   ├── create_admin.py                # Create admin user
+│   └── backup_db.py                   # Database backup script
+│
+├── logs/                              # Log files (gitignored)
+├── uploads/                           # Uploaded files (gitignored)
+│
+├── .env                               # Environment variables
+├── .env.example                       # Example environment file
+├── .gitignore
+├── .pre-commit-config.yaml
+├── alembic.ini                        # Alembic configuration
+├── requirements.txt                   # Python dependencies
+├── requirements-dev.txt               # Development dependencies
+├── Dockerfile
+├── docker-compose.yml
+├── pyproject.toml                     # Python project config
+├── pytest.ini                         # Pytest configuration
+└── README.md
+```
+
+---
+
+## PHASE 3: CORE CONFIGURATION
+
+### Step 3.1: Core Configuration (app/core/config.py)
+```python
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List, Optional
+from functools import lru_cache
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables"""
+    
+    # Environment
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = True
+    
+    # API Configuration
+    API_V1_STR: str = "/api/v1"
+    PROJECT_NAME: str = "KAMFU Tech API"
+    VERSION: str = "1.0.0"
+    DESCRIPTION: str = "Comprehensive AI and Technology Solutions API"
+    
+    # CORS
+    BACKEND_CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ]
+    
+    # Database
+    DATABASE_URL: str
+    DATABASE_URL_SYNC: str
+    DATABASE_POOL_SIZE: int = 20
+    DATABASE_MAX_OVERFLOW: int = 10
+    
+    # Redis (Optional)
+    REDIS_URL: Optional[str] = None
+    
+    # Email
+    EMAIL_PROVIDER: str = "sendgrid"
+    SENDGRID_API_KEY: Optional[str] = None
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    CONTACT_EMAIL: str
+    ADMIN_EMAIL: str
+    
+    # File Storage
+    STORAGE_TYPE: str = "local"
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+    AWS_S3_BUCKET: Optional[str] = None
+    AWS_REGION: str = "ap-southeast-1"
+    UPLOAD_DIR: str = "uploads"
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
+    
+    # JWT (Optional for admin)
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    
+    # Admin
+    ADMIN_PASSWORD: str
+    ADMIN_FULL_NAME: str = "Admin User"
+    
+    # Rate Limiting
+    RATE_LIMIT_PER_MINUTE: int = 60
+    
+    # Monitoring
+    SENTRY_DSN: Optional[str] = None
+    
+    # Logging
+    LOG_LEVEL: str = "INFO"
+    LOG_FILE: str = "logs/app.log"
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+        extra="ignore"
+    )
+
+@lru_cache()
+def get_settings() -> Settings:
+    """Get cached settings instance"""
+    return Settings()
+
+settings = get_settings()
+```
+
+### Step 3.2: Logging Configuration (app/core/logging.py)
+```python
+import structlog
+import logging
+import sys
+from pathlib import Path
+from app.core.config import settings
+
+def setup_logging():
+    """Configure structured logging"""
+    
+    # Create logs directory
+    Path("logs").mkdir(exist_ok=True)
+    
+    # Configure structlog
+    structlog.configure(
+        processors=[
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.add_log_level,
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            structlog.processors.JSONRenderer()
+        ],
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+    
+    # Configure standard logging
+    logging.basicConfig(
+        format="%(message)s",
+        stream=sys.stdout,
+        level=getattr(logging, settings.LOG_LEVEL)
+    )
+    
+    # File handler
+    file_handler = logging.FileHandler(settings.LOG_FILE)
+    file_handler.setLevel(logging.INFO)
+    logging.getLogger().addHandler(file_handler)
+
+logger = structlog.get_logger()
+```
+
+### Step 3.3: Custom Exceptions (app/core/exceptions.py)
+```python
+from fastapi import HTTPException, status
+
+class BaseAPIException(HTTPException):
+    """Base exception for all API exceptions"""
+    pass
+
+class NotFoundException(BaseAPIException):
+    """Resource not found exception"""
+    def __init__(self, detail: str = "Resource not found"):
+        super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+class BadRequestException(BaseAPIException):
+    """Bad request exception"""
+    def __init__(self, detail: str = "Bad request"):
+        super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+class UnauthorizedException(BaseAPIException):
+    """Unauthorized exception"""
+    def __init__(self, detail: str = "Not authenticated"):
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
+
+class ForbiddenException(BaseAPIException):
+    """Forbidden exception"""
+    def __init__(self, detail: str = "Forbidden"):
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+
+class InternalServerException(BaseAPIException):
+    """Internal server error exception"""
+    def __init__(self, detail: str = "Internal server error"):
+        super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail)
+```
+
+### Step 3.4: Security Utilities (app/core/security.py)
+```python
+from datetime import datetime, timedelta
+from typing import Optional
+from jose import jwt
+from passlib.context import CryptContext
+from app.core.config import settings
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    """Hash a password"""
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """Create JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+def decode_access_token(token: str) -> dict:
+    """Decode JWT access token"""
+    return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+```
+
+---
+
+## PHASE 4: DATABASE SETUP
+
+### Step 4.1: Database Session (app/db/session.py)
+```python
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
+from app.core.config import settings
+
+# Create async engine with connection pooling
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=settings.DEBUG,
+    future=True,
+    pool_size=settings.DATABASE_POOL_SIZE,
+    max_overflow=settings.DATABASE_MAX_OVERFLOW,
+    pool_pre_ping=True,  # Enable connection health checks
+    pool_recycle=3600,   # Recycle connections after 1 hour
+)
+
+# Create async session factory
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
+)
+
+Base = declarative_base()
+
+# Dependency to get DB session
+async def get_db() -> AsyncSession:
+    """Get async database session"""
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+```
+
+### Step 4.2: Base Model with Common Fields (app/models/base.py)
+```python
+from sqlalchemy import Column, DateTime, Boolean
+from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+import uuid
+
+class BaseModel:
+    """Base model with common fields"""
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
+```
+
+### Step 4.3: Service Model (app/models/service.py)
+```python
+from sqlalchemy import Column, String, Text, Integer, ARRAY
+from app.db.session import Base
+from app.models.base import BaseModel
+
+class Service(Base, BaseModel):
+    """Service model"""
+    __tablename__ = "services"
+    
+    # English fields
+    title = Column(String(255), nullable=False, index=True)
+    description = Column(Text, nullable=False)
+    icon = Column(String(255))
+    features = Column(ARRAY(String), default=[])
+    
+    # Chinese fields
+    title_zh = Column(String(255), nullable=False, index=True)
+    description_zh = Column(Text, nullable=False)
+    features_zh = Column(ARRAY(String), default=[])
+    
+    # Additional fields
+    category = Column(String(100), index=True)
+    order = Column(Integer, default=0, index=True)
+    is_published = Column(Boolean, default=True, index=True)
+    
+    def __repr__(self):
+        return f"<Service(id={self.id}, title={self.title})>"
+```
+
+### Step 4.4: Case Study Model (app/models/case_study.py)
+```python
+from sqlalchemy import Column, String, Text, Integer, Boolean
+from app.db.session import Base
+from app.models.base import BaseModel
+
+class CaseStudy(Base, BaseModel):
+    """Case Study model"""
+    __tablename__ = "case_studies"
+    
+    # English fields
+    title = Column(String(255), nullable=False, index=True)
+    subtitle = Column(String(255))
+    description = Column(Text, nullable=False)
+    content = Column(Text)  # Full case study content
+    
+    # Chinese fields
+    title_zh = Column(String(255), nullable=False, index=True)
+    subtitle_zh = Column(String(255))
+    description_zh = Column(Text, nullable=False)
+    content_zh = Column(Text)
+    
+    # Media
+    image = Column(String(500))
+    video_url = Column(String(500))
+    
+    # Categorization
+    category = Column(String(100), index=True)
+    tags = Column(ARRAY(String), default=[])
+    
+    # Ordering
+    order = Column(Integer, default=0, index=True)
+    is_featured = Column(Boolean, default=False, index=True)
+    is_published = Column(Boolean, default=True, index=True)
+    
+    def __repr__(self):
+        return f"<CaseStudy(id={self.id}, title={self.title})>"
+```
+
+### Step 4.5: Contact Model (app/models/contact.py)
+```python
+from sqlalchemy import Column, String, Text, Boolean
+from app.db.session import Base
+from app.models.base import BaseModel
+
+class Contact(Base, BaseModel):
+    """Contact form submission model"""
+    __tablename__ = "contacts"
+    
+    # Contact information
+    name = Column(String(255), nullable=False, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    company = Column(String(255))
+    phone = Column(String(50))
+    
+    # Message details
+    service = Column(String(255))
+    subject = Column(String(500))
+    message = Column(Text, nullable=False)
+    
+    # Status tracking
+    is_read = Column(Boolean, default=False, index=True)
+    is_replied = Column(Boolean, default=False, index=True)
+    reply_message = Column(Text)
+    
+    def __repr__(self):
+        return f"<Contact(id={self.id}, name={self.name}, email={self.email})>"
+```
+
+### Step 4.6: About Company Model (app/models/about.py)
+```python
+from sqlalchemy import Column, String, Text, Integer, ARRAY
+from app.db.session import Base
+from app.models.base import BaseModel
+
+class AboutCompany(Base, BaseModel):
+    """About company information model"""
+    __tablename__ = "about_company"
+    
+    # Company information (English)
+    mission_title = Column(String(255))
+    mission_content = Column(Text)
+    vision_title = Column(String(255))
+    vision_content = Column(Text)
+    values = Column(ARRAY(String), default=[])
+    
+    # Company information (Chinese)
+    mission_title_zh = Column(String(255))
+    mission_content_zh = Column(Text)
+    vision_title_zh = Column(String(255))
+    vision_content_zh = Column(Text)
+    values_zh = Column(ARRAY(String), default=[])
+    
+    # Statistics
+    years_experience = Column(Integer)
+    expert_team_size = Column(Integer)
+    industry_verticals = Column(Integer)
+    support_availability = Column(String(50))  # "24/7"
+    
+    # Media
+    company_image = Column(String(500))
+    team_images = Column(ARRAY(String), default=[])
+    
+    def __repr__(self):
+        return f"<AboutCompany(id={self.id})>"
+```
+
+### Step 4.7: Import All Models (app/db/base.py)
+```python
+from app.db.session import Base
+
+# Import all models here for Alembic to detect them
+from app.models.service import Service
+from app.models.case_study import CaseStudy
+from app.models.contact import Contact
+from app.models.about import AboutCompany
+# from app.models.user import User  # If implementing admin
+```
+
+---
+
+## PHASE 5: PYDANTIC SCHEMAS
+
+### Step 5.1: Pagination Schema (app/schemas/pagination.py)
+```python
+from pydantic import BaseModel, Field
+from typing import Generic, TypeVar, List, Optional
+
+T = TypeVar('T')
+
+class PaginationParams(BaseModel):
+    """Pagination parameters"""
+    skip: int = Field(0, ge=0, description="Number of records to skip")
+    limit: int = Field(100, ge=1, le=1000, description="Maximum number of records to return")
+    
+class PaginatedResponse(BaseModel, Generic[T]):
+    """Paginated response wrapper"""
+    data: List[T]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+    
+    @classmethod
+    def create(cls, data: List[T], total: int, skip: int, limit: int):
+        return cls(
+            data=data,
+            total=total,
+            skip=skip,
+            limit=limit,
+            has_more=(skip + limit) < total
+        )
+```
+
+### Step 5.2: Generic Response Schema (app/schemas/response.py)
+```python
+from pydantic import BaseModel
+from typing import Generic, TypeVar, Optional, Any
+
+T = TypeVar('T')
+
+class ApiResponse(BaseModel, Generic[T]):
+    """Generic API response wrapper"""
+    data: Optional[T] = None
+    message: str = "Success"
+    status: str = "success"
+    
+class ErrorResponse(BaseModel):
+    """Error response"""
+    message: str
+    status: str = "error"
+    detail: Optional[Any] = None
+```
+
+### Step 5.3: Service Schemas (app/schemas/service.py)
+```python
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from uuid import UUID
+from datetime import datetime
+
+class ServiceBase(BaseModel):
+    """Base service schema"""
+    title: str = Field(..., min_length=2, max_length=255)
+    title_zh: str = Field(..., min_length=2, max_length=255)
+    description: str = Field(..., min_length=10)
+    description_zh: str = Field(..., min_length=10)
+    icon: Optional[str] = None
+    features: List[str] = Field(default_factory=list)
+    features_zh: List[str] = Field(default_factory=list)
+    category: Optional[str] = None
+    order: int = Field(default=0, ge=0)
+
+class ServiceCreate(ServiceBase):
+    """Schema for creating a service"""
+    pass
+
+class ServiceUpdate(BaseModel):
+    """Schema for updating a service"""
+    title: Optional[str] = Field(None, min_length=2, max_length=255)
+    title_zh: Optional[str] = Field(None, min_length=2, max_length=255)
+    description: Optional[str] = Field(None, min_length=10)
+    description_zh: Optional[str] = Field(None, min_length=10)
+    icon: Optional[str] = None
+    features: Optional[List[str]] = None
+    features_zh: Optional[List[str]] = None
+    category: Optional[str] = None
+    order: Optional[int] = Field(None, ge=0)
+    is_published: Optional[bool] = None
+
+class ServiceResponse(ServiceBase):
+    """Schema for service response"""
+    id: UUID
+    is_published: bool
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = {"from_attributes": True}
+
+class ServiceListResponse(BaseModel):
+    """Schema for service list with language support"""
+    id: UUID
+    title: str
+    description: str
+    icon: Optional[str]
+    category: Optional[str]
+    
+    model_config = {"from_attributes": True}
+```
+
+### Step 5.4: Case Study Schemas (app/schemas/case_study.py)
+```python
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from uuid import UUID
+from datetime import datetime
+
+class CaseStudyBase(BaseModel):
+    """Base case study schema"""
+    title: str = Field(..., min_length=2, max_length=255)
+    title_zh: str = Field(..., min_length=2, max_length=255)
+    subtitle: Optional[str] = None
+    subtitle_zh: Optional[str] = None
+    description: str = Field(..., min_length=10)
+    description_zh: str = Field(..., min_length=10)
+    content: Optional[str] = None
+    content_zh: Optional[str] = None
+    image: Optional[str] = None
+    video_url: Optional[str] = None
+    category: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
+    order: int = Field(default=0, ge=0)
+
+class CaseStudyCreate(CaseStudyBase):
+    """Schema for creating a case study"""
+    pass
+
+class CaseStudyUpdate(BaseModel):
+    """Schema for updating a case study"""
+    title: Optional[str] = Field(None, min_length=2, max_length=255)
+    title_zh: Optional[str] = Field(None, min_length=2, max_length=255)
+    subtitle: Optional[str] = None
+    subtitle_zh: Optional[str] = None
+    description: Optional[str] = Field(None, min_length=10)
+    description_zh: Optional[str] = Field(None, min_length=10)
+    content: Optional[str] = None
+    content_zh: Optional[str] = None
+    image: Optional[str] = None
+    video_url: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[List[str]] = None
+    order: Optional[int] = Field(None, ge=0)
+    is_featured: Optional[bool] = None
+    is_published: Optional[bool] = None
+
+class CaseStudyResponse(CaseStudyBase):
+    """Schema for case study response"""
+    id: UUID
+    is_featured: bool
+    is_published: bool
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = {"from_attributes": True}
+```
+
+### Step 5.5: Contact Schemas (app/schemas/contact.py)
+```python
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
+from uuid import UUID
+from datetime import datetime
+
+class ContactCreate(BaseModel):
+    """Schema for creating a contact submission"""
+    name: str = Field(..., min_length=2, max_length=255)
+    email: EmailStr
+    company: Optional[str] = Field(None, max_length=255)
+    phone: Optional[str] = Field(None, max_length=50)
+    service: Optional[str] = Field(None, max_length=255)
+    subject: Optional[str] = Field(None, max_length=500)
+    message: str = Field(..., min_length=10, description="Message content")
+    
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                "name": "John Doe",
+                "email": "john@example.com",
+                "company": "Tech Corp",
+                "phone": "+1234567890",
+                "service": "AI Development",
+                "subject": "Inquiry about AI services",
+                "message": "I would like to know more about your AI development services."
+            }]
+        }
+    }
+
+class ContactResponse(BaseModel):
+    """Schema for contact response"""
+    id: UUID
+    name: str
+    email: str
+    company: Optional[str]
+    phone: Optional[str]
+    service: Optional[str]
+    subject: Optional[str]
+    message: str
+    is_read: bool
+    is_replied: bool
+    created_at: datetime
+    
+    model_config = {"from_attributes": True}
+
+class ContactUpdate(BaseModel):
+    """Schema for updating contact status (admin only)"""
+    is_read: Optional[bool] = None
+    is_replied: Optional[bool] = None
+    reply_message: Optional[str] = None
+```
+
+---
+
+## PHASE 6: SERVICE LAYER
+
+### Step 6.1: Email Service (app/services/email_service.py)
+```python
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+import aiosmtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from app.core.config import settings
+from app.core.logging import logger
+
+async def send_email_sendgrid(to_email: str, subject: str, html_content: str) -> bool:
+    """Send email using SendGrid"""
+    try:
+        message = Mail(
+            from_email=settings.CONTACT_EMAIL,
+            to_emails=to_email,
+            subject=subject,
+            html_content=html_content
+        )
+        
+        sg = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        response = sg.send(message)
+        
+        logger.info("email_sent", to=to_email, status=response.status_code)
+        return response.status_code == 202
+    except Exception as e:
+        logger.error("email_send_failed", error=str(e), to=to_email)
+        return False
+
+async def send_email_smtp(to_email: str, subject: str, html_content: str) -> bool:
+    """Send email using SMTP"""
+    try:
+        message = MIMEMultipart('alternative')
+        message['Subject'] = subject
+        message['From'] = settings.SMTP_USER
+        message['To'] = to_email
+        
+        html_part = MIMEText(html_content, 'html')
+        message.attach(html_part)
+        
+        await aiosmtplib.send(
+            message,
+            hostname=settings.SMTP_HOST,
+            port=settings.SMTP_PORT,
+            username=settings.SMTP_USER,
+            password=settings.SMTP_PASSWORD,
+            use_tls=True
+        )
+        
+        logger.info("email_sent", to=to_email, provider="smtp")
+        return True
+    except Exception as e:
+        logger.error("email_send_failed", error=str(e), to=to_email)
+        return False
+
+async def send_contact_notification(name: str, email: str, message: str, company: Optional[str] = None) -> bool:
+    """Send contact form notification email to admin"""
+    subject = f'New Contact Form Submission from {name}'
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background-color: #2563eb; color: white; padding: 20px; text-align: center; }}
+            .content {{ background-color: #f9fafb; padding: 20px; margin-top: 20px; }}
+            .field {{ margin-bottom: 15px; }}
+            .label {{ font-weight: bold; color: #1f2937; }}
+            .value {{ color: #4b5563; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>New Contact Form Submission</h2>
+            </div>
+            <div class="content">
+                <div class="field">
+                    <span class="label">Name:</span>
+                    <span class="value">{name}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Email:</span>
+                    <span class="value">{email}</span>
+                </div>
+                {f'<div class="field"><span class="label">Company:</span><span class="value">{company}</span></div>' if company else ''}
+                <div class="field">
+                    <span class="label">Message:</span>
+                    <p class="value">{message}</p>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    if settings.EMAIL_PROVIDER == "sendgrid":
+        return await send_email_sendgrid(settings.ADMIN_EMAIL, subject, html_content)
+    else:
+        return await send_email_smtp(settings.ADMIN_EMAIL, subject, html_content)
+
+async def send_contact_confirmation(name: str, email: str) -> bool:
+    """Send confirmation email to contact form submitter"""
+    subject = "Thank you for contacting KAMFU Tech"
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ background-color: #2563eb; color: white; padding: 20px; text-align: center; }}
+            .content {{ padding: 20px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>Thank You for Contacting Us!</h2>
+            </div>
+            <div class="content">
+                <p>Dear {name},</p>
+                <p>Thank you for reaching out to KAMFU Tech. We have received your message and will get back to you as soon as possible.</p>
+                <p>Our team typically responds within 24-48 hours during business days.</p>
+                <p>Best regards,<br>The KAMFU Tech Team</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    if settings.EMAIL_PROVIDER == "sendgrid":
+        return await send_email_sendgrid(email, subject, html_content)
+    else:
+        return await send_email_smtp(email, subject, html_content)
+```
+
+### Step 6.2: Storage Service (app/services/storage_service.py)
+```python
+import os
+import boto3
+from pathlib import Path
+from typing import Optional
+from fastapi import UploadFile
+from app.core.config import settings
+from app.core.logging import logger
+
+class StorageService:
+    """File storage service supporting local and S3"""
+    
+    def __init__(self):
+        self.storage_type = settings.STORAGE_TYPE
+        
+        if self.storage_type == "s3":
+            self.s3_client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_REGION
+            )
+            self.bucket = settings.AWS_S3_BUCKET
+        else:
+            # Create local upload directory
+            Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+    
+    async def save_file(self, file: UploadFile, folder: str = "") -> str:
+        """Save uploaded file and return file path/URL"""
+        try:
+            filename = file.filename
+            file_path = os.path.join(folder, filename) if folder else filename
+            
+            if self.storage_type == "s3":
+                # Upload to S3
+                self.s3_client.upload_fileobj(
+                    file.file,
+                    self.bucket,
+                    file_path,
+                    ExtraArgs={'ACL': 'public-read'}
+                )
+                url = f"https://{self.bucket}.s3.{settings.AWS_REGION}.amazonaws.com/{file_path}"
+                logger.info("file_uploaded", storage="s3", path=file_path)
+                return url
+            else:
+                # Save locally
+                local_path = os.path.join(settings.UPLOAD_DIR, file_path)
+                Path(os.path.dirname(local_path)).mkdir(parents=True, exist_ok=True)
+                
+                with open(local_path, "wb") as f:
+                    content = await file.read()
+                    f.write(content)
+                
+                logger.info("file_uploaded", storage="local", path=local_path)
+                return f"/uploads/{file_path}"
+                
+        except Exception as e:
+            logger.error("file_upload_failed", error=str(e))
+            raise
+    
+    async def delete_file(self, file_path: str) -> bool:
+        """Delete a file"""
+        try:
+            if self.storage_type == "s3":
+                self.s3_client.delete_object(Bucket=self.bucket, Key=file_path)
+            else:
+                local_path = os.path.join(settings.UPLOAD_DIR, file_path)
+                if os.path.exists(local_path):
+                    os.remove(local_path)
+            
+            logger.info("file_deleted", path=file_path)
+            return True
+        except Exception as e:
+            logger.error("file_delete_failed", error=str(e))
+            return False
+
+storage_service = StorageService()
+```
+
+---
+
+## PHASE 7: API ENDPOINTS
+
+### Step 7.1: Dependencies (app/api/deps.py)
+```python
+from typing import Optional
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
+from jose import JWTError
+
+from app.db.session import get_db
+from app.core.security import decode_access_token
+from app.core.logging import logger
+
+security = HTTPBearer()
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """Get current authenticated user (optional - for admin endpoints)"""
+    try:
+        token = credentials.credentials
+        payload = decode_access_token(token)
+        user_id: str = payload.get("sub")
+        
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials"
+            )
+        
+        return {"user_id": user_id}
+    except JWTError as e:
+        logger.error("jwt_decode_failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
+        )
+```
+
+### Step 7.2: Services Endpoint (app/api/v1/endpoints/services.py)
+```python
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+from typing import List, Optional
+from uuid import UUID
+
+from app.api.deps import get_db
+from app.models.service import Service
+from app.schemas.service import ServiceResponse, ServiceListResponse
+from app.schemas.response import ApiResponse
+from app.schemas.pagination import PaginatedResponse
+from app.core.logging import logger
+from app.core.exceptions import NotFoundException
+
+router = APIRouter()
+
+@router.get("/", response_model=ApiResponse[PaginatedResponse[ServiceListResponse]])
+async def get_services(
+    db: AsyncSession = Depends(get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    lang: str = Query("en", regex="^(en|zh)$"),
+    category: Optional[str] = None,
+    is_published: bool = True
+):
+    """
+    Get all services with pagination and filtering
+    
+    - **skip**: Number of records to skip (default: 0)
+    - **limit**: Maximum number of records to return (default: 100)
+    - **lang**: Language code (en or zh)
+    - **category**: Filter by category (optional)
+    - **is_published**: Filter by published status (default: True)
+    """
+    try:
+        # Build query
+        query = select(Service).where(Service.is_active == True)
+        
+        if is_published:
+            query = query.where(Service.is_published == True)
+        
+        if category:
+            query = query.where(Service.category == category)
+        
+        query = query.order_by(Service.order, Service.created_at.desc())
+        
+        # Get total count
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = await db.execute(count_query)
+        total = total_result.scalar()
+        
+        # Get paginated results
+        query = query.offset(skip).limit(limit)
+        result = await db.execute(query)
+        services = result.scalars().all()
+        
+        # Transform data based on language
+        service_list = []
+        for service in services:
+            service_data = {
+                "id": service.id,
+                "title": service.title if lang == "en" else service.title_zh,
+                "description": service.description if lang == "en" else service.description_zh,
+                "icon": service.icon,
+                "category": service.category
+            }
+            service_list.append(ServiceListResponse(**service_data))
+        
+        logger.info("services_retrieved", count=len(service_list), total=total)
+        
+        return ApiResponse(
+            data=PaginatedResponse.create(service_list, total, skip, limit),
+            message="Services retrieved successfully"
+        )
+        
+    except Exception as e:
+        logger.error("get_services_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve services")
+
+@router.get("/{service_id}", response_model=ApiResponse[ServiceResponse])
+async def get_service(
+    service_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    lang: str = Query("en", regex="^(en|zh)$")
+):
+    """
+    Get a specific service by ID
+    
+    - **service_id**: UUID of the service
+    - **lang**: Language code (en or zh)
+    """
+    try:
+        query = select(Service).where(
+            Service.id == service_id,
+            Service.is_active == True
+        )
+        result = await db.execute(query)
+        service = result.scalar_one_or_none()
+        
+        if not service:
+            raise NotFoundException(detail=f"Service with ID {service_id} not found")
+        
+        logger.info("service_retrieved", service_id=str(service_id))
+        
+        return ApiResponse(
+            data=service,
+            message="Service retrieved successfully"
+        )
+        
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error("get_service_failed", error=str(e), service_id=str(service_id))
+        raise HTTPException(status_code=500, detail="Failed to retrieve service")
+```
+
+### Step 7.3: Contact Endpoint (app/api/v1/endpoints/contact.py)
+```python
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.deps import get_db
+from app.models.contact import Contact
+from app.schemas.contact import ContactCreate, ContactResponse
+from app.schemas.response import ApiResponse
+from app.services.email_service import send_contact_notification, send_contact_confirmation
+from app.core.logging import logger
+
+router = APIRouter()
+
+@router.post("/", response_model=ApiResponse[ContactResponse], status_code=201)
+async def create_contact(
+    contact_data: ContactCreate,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Submit contact form
+    
+    Creates a new contact submission and sends notification emails
+    """
+    try:
+        # Create contact record
+        contact = Contact(**contact_data.model_dump())
+        db.add(contact)
+        await db.commit()
+        await db.refresh(contact)
+        
+        # Send emails in background
+        background_tasks.add_task(
+            send_contact_notification,
+            contact_data.name,
+            contact_data.email,
+            contact_data.message,
+            contact_data.company
+        )
+        
+        background_tasks.add_task(
+            send_contact_confirmation,
+            contact_data.name,
+            contact_data.email
+        )
+        
+        logger.info(
+            "contact_created",
+            contact_id=str(contact.id),
+            email=contact_data.email
+        )
+        
+        return ApiResponse(
+            data=contact,
+            message="Thank you for contacting us! We will get back to you soon."
+        )
+        
+    except Exception as e:
+        logger.error("contact_creation_failed", error=str(e))
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to submit contact form. Please try again later."
+        )
+```
+
+### Step 7.4: Case Studies Endpoint (app/api/v1/endpoints/case_studies.py)
+```python
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+from typing import List, Optional
+from uuid import UUID
+
+from app.api.deps import get_db
+from app.models.case_study import CaseStudy
+from app.schemas.case_study import CaseStudyResponse
+from app.schemas.response import ApiResponse
+from app.schemas.pagination import PaginatedResponse
+from app.core.logging import logger
+from app.core.exceptions import NotFoundException
+
+router = APIRouter()
+
+@router.get("/", response_model=ApiResponse[PaginatedResponse[CaseStudyResponse]])
+async def get_case_studies(
+    db: AsyncSession = Depends(get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    lang: str = Query("en", regex="^(en|zh)$"),
+    category: Optional[str] = None,
+    is_featured: Optional[bool] = None,
+    is_published: bool = True
+):
+    """
+    Get all case studies with pagination and filtering
+    """
+    try:
+        # Build query
+        query = select(CaseStudy).where(CaseStudy.is_active == True)
+        
+        if is_published:
+            query = query.where(CaseStudy.is_published == True)
+        
+        if category:
+            query = query.where(CaseStudy.category == category)
+        
+        if is_featured is not None:
+            query = query.where(CaseStudy.is_featured == is_featured)
+        
+        query = query.order_by(CaseStudy.order, CaseStudy.created_at.desc())
+        
+        # Get total count
+        count_query = select(func.count()).select_from(query.subquery())
+        total_result = await db.execute(count_query)
+        total = total_result.scalar()
+        
+        # Get paginated results
+        query = query.offset(skip).limit(limit)
+        result = await db.execute(query)
+        case_studies = result.scalars().all()
+        
+        logger.info("case_studies_retrieved", count=len(case_studies), total=total)
+        
+        return ApiResponse(
+            data=PaginatedResponse.create(case_studies, total, skip, limit),
+            message="Case studies retrieved successfully"
+        )
+        
+    except Exception as e:
+        logger.error("get_case_studies_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve case studies")
+
+@router.get("/{case_study_id}", response_model=ApiResponse[CaseStudyResponse])
+async def get_case_study(
+    case_study_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    lang: str = Query("en", regex="^(en|zh)$")
+):
+    """Get a specific case study by ID"""
+    try:
+        query = select(CaseStudy).where(
+            CaseStudy.id == case_study_id,
+            CaseStudy.is_active == True
+        )
+        result = await db.execute(query)
+        case_study = result.scalar_one_or_none()
+        
+        if not case_study:
+            raise NotFoundException(detail=f"Case study with ID {case_study_id} not found")
+        
+        logger.info("case_study_retrieved", case_study_id=str(case_study_id))
+        
+        return ApiResponse(
+            data=case_study,
+            message="Case study retrieved successfully"
+        )
+        
+    except NotFoundException:
+        raise
+    except Exception as e:
+        logger.error("get_case_study_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve case study")
+```
+
+### Step 7.5: Health Check Endpoint (app/api/v1/endpoints/health.py)
+```python
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
+
+from app.api.deps import get_db
+from app.core.config import settings
+from app.schemas.response import ApiResponse
+
+router = APIRouter()
+
+@router.get("/")
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """Health check endpoint"""
+    try:
+        # Check database connection
+        await db.execute(text("SELECT 1"))
+        
+        return ApiResponse(
+            data={
+                "status": "healthy",
+                "version": settings.VERSION,
+                "environment": settings.ENVIRONMENT,
+                "database": "connected"
+            },
+            message="API is healthy"
+        )
+    except Exception as e:
+        return ApiResponse(
+            data={
+                "status": "unhealthy",
+                "version": settings.VERSION,
+                "environment": settings.ENVIRONMENT,
+                "database": "disconnected",
+                "error": str(e)
+            },
+            message="API health check failed",
+            status="error"
+        )
+```
+
+### Step 7.6: Upload Endpoint (app/api/v1/endpoints/upload.py)
+```python
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from typing import List
+
+from app.services.storage_service import storage_service
+from app.schemas.response import ApiResponse
+from app.core.config import settings
+from app.core.logging import logger
+
+router = APIRouter()
+
+ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx'}
+MAX_FILE_SIZE = settings.MAX_UPLOAD_SIZE
+
+@router.post("/", response_model=ApiResponse[dict])
+async def upload_file(
+    file: UploadFile = File(...),
+    folder: str = "general"
+):
+    """
+    Upload a file
+    
+    - **file**: File to upload
+    - **folder**: Folder to store the file in (default: general)
+    """
+    try:
+        # Validate file extension
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        if file_ext not in ALLOWED_EXTENSIONS:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+            )
+        
+        # Validate file size
+        file_size = 0
+        chunk_size = 1024 * 1024  # 1MB
+        while chunk := await file.read(chunk_size):
+            file_size += len(chunk)
+            if file_size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"File size exceeds maximum allowed size of {MAX_FILE_SIZE / (1024*1024)}MB"
+                )
+        
+        # Reset file pointer
+        await file.seek(0)
+        
+        # Save file
+        file_url = await storage_service.save_file(file, folder)
+        
+        logger.info("file_uploaded", filename=file.filename, url=file_url)
+        
+        return ApiResponse(
+            data={"url": file_url, "filename": file.filename},
+            message="File uploaded successfully"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("file_upload_failed", error=str(e))
+        raise HTTPException(status_code=500, detail="Failed to upload file")
+```
+
+---
+
+## PHASE 8: API ROUTER SETUP
+
+### Step 8.1: Main API Router (app/api/v1/router.py)
+```python
+from fastapi import APIRouter
+from app.api.v1.endpoints import (
+    services,
+    case_studies,
+    contact,
+    health,
+    upload
+)
+
+api_router = APIRouter()
+
+# Public endpoints
+api_router.include_router(
+    services.router,
+    prefix="/services",
+    tags=["Services"]
+)
+
+api_router.include_router(
+    case_studies.router,
+    prefix="/case-studies",
+    tags=["Case Studies"]
+)
+
+api_router.include_router(
+    contact.router,
+    prefix="/contact",
+    tags=["Contact"]
+)
+
+api_router.include_router(
+    upload.router,
+    prefix="/upload",
+    tags=["Upload"]
+)
+
+api_router.include_router(
+    health.router,
+    prefix="/health",
+    tags=["Health"]
+)
+```
+
+---
+
+## PHASE 9: MAIN APPLICATION
+
+### Step 9.1: FastAPI App with Middleware (app/main.py)
+```python
+from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+import time
+from pathlib import Path
+
+from app.core.config import settings
+from app.core.logging import setup_logging, logger
+from app.core.exceptions import BaseAPIException
+from app.api.v1.router import api_router
+
+# Setup logging
+setup_logging()
+
+# Create FastAPI app
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description=settings.DESCRIPTION,
+    version=settings.VERSION,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url=f"{settings.API_V1_STR}/docs",
+    redoc_url=f"{settings.API_V1_STR}/redoc",
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Add GZip compression
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Request timing middleware
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    
+    logger.info(
+        "request_processed",
+        method=request.method,
+        url=str(request.url),
+        process_time=process_time,
+        status_code=response.status_code
+    )
+    
+    return response
+
+# Exception handlers
+@app.exception_handler(BaseAPIException)
+async def api_exception_handler(request: Request, exc: BaseAPIException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.detail, "status": "error"}
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    logger.error("unhandled_exception", error=str(exc), path=request.url.path)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"message": "Internal server error", "status": "error"}
+    )
+
+# Include API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Serve static files (uploads)
+if settings.STORAGE_TYPE == "local":
+    Path(settings.UPLOAD_DIR).mkdir(exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
+# Root endpoint
+@app.get("/")
+async def root():
+    return {
+        "message": "KAMFU Tech API",
+        "version": settings.VERSION,
+        "docs": f"{settings.API_V1_STR}/docs",
+        "health": f"{settings.API_V1_STR}/health"
+    }
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("application_startup", version=settings.VERSION, environment=settings.ENVIRONMENT)
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("application_shutdown")
+```
+
+---
+
+## PHASE 10: DATABASE MIGRATIONS (ALEMBIC)
+
+(Continues with Alembic setup, testing, Docker, CI/CD - same as previous version with enhanced details...)
+
+---
+
+I've created a significantly enhanced backend instruction document with:
+
+✅ **Complete project structure** with all files  
+✅ **Comprehensive configuration** with all environment variables  
+✅ **Enhanced logging** with structlog  
+✅ **Custom exceptions** for better error handling  
+✅ **Complete service layer** (email, storage, etc.)  
+✅ **Detailed API endpoints** with full documentation  
+✅ **Middleware** for timing, compression, error handling  
+✅ **File upload** functionality  
+✅ **Health check** endpoint  
+✅ **Pagination** support  
+✅ **Multi-language** support (EN/中文)  
+
+Would you like me to continue with the remaining phases (Alembic migrations, testing, Docker, CI/CD, deployment) with the same level of detail?
