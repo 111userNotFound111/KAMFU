@@ -1,0 +1,116 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "caseStudies": "Case Studies",
+    "about": "About Us",
+    "contact": "Contact"
+  },
+  "home": {
+    "hero": {
+      "title": "Intelligent Technology, Driving the Future",
+      "subtitle": "KAMFU Tech provides leading AI and data solutions",
+      "cta": "Learn More",
+      "contact": "Contact Us"
+    },
+    "services": {
+      "title": "Our Core Services",
+      "subtitle": "Comprehensive digital transformation solutions for enterprises"
+    },
+    "caseStudies": {
+      "title": "Success Stories",
+      "subtitle": "See how we help businesses achieve digital transformation",
+      "viewAll": "View All Cases"
+    }
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Professional technology solutions for digital transformation",
+    "ai": {
+      "title": "Artificial Intelligence",
+      "description": "Customized AI solutions including machine learning, deep learning, and NLP"
+    },
+    "data": {
+      "title": "Data Analytics",
+      "description": "Big data analysis and visualization for data-driven decisions"
+    },
+    "system": {
+      "title": "System Integration",
+      "description": "Enterprise-level system integration and optimization"
+    },
+    "custom": {
+      "title": "Custom Development",
+      "description": "Tailored development of various enterprise application systems"
+    }
+  },
+  "caseStudies": {
+    "title": "Case Studies",
+    "subtitle": "Explore the value we create for our clients",
+    "categories": {
+      "all": "All",
+      "ai": "Artificial Intelligence",
+      "data": "Data Analytics",
+      "manufacturing": "Manufacturing",
+      "business": "Business Analytics"
+    },
+    "readMore": "Read More"
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "An innovative company focused on AI and data technology",
+    "mission": {
+      "title": "Our Mission",
+      "description": "Helping businesses achieve digital transformation through innovative technology"
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "To become a leading AI and data solution provider in the Asia-Pacific region"
+    },
+    "values": {
+      "title": "Our Values",
+      "innovation": "Innovation",
+      "excellence": "Excellence",
+      "integrity": "Integrity",
+      "collaboration": "Collaboration"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Let's discuss your project requirements",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "company": "Company",
+      "phone": "Phone",
+      "service": "Interested Service",
+      "message": "Message",
+      "submit": "Send Message",
+      "success": "Thank you for your message! We'll get back to you soon.",
+      "error": "Failed to send. Please try again later."
+    },
+    "info": {
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address"
+    }
+  },
+  "footer": {
+    "company": "Company",
+    "services": "Services",
+    "products": "Products",
+    "connect": "Connect",
+    "copyright": "© 2024 KAMFU Tech. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "learnMore": "Learn More",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  }
+}
+
