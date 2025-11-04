@@ -105,7 +105,10 @@
       <!-- 产品卡片容器 -->
       <div class="product-cards-container">
         <!-- 第一张卡片：AI Digital Human -->
-        <div class="product-card">
+        <div 
+          class="product-card" 
+          @click="navigateToProduct('ProductAIDigitalHuman')"
+        >
           <img
             src="@/assets/Home/7.png"
             alt="AI Digital Human"
@@ -127,7 +130,10 @@
         </div>
 
         <!-- 第二张卡片：Intelligent Q&A System -->
-        <div class="product-card">
+        <div 
+          class="product-card" 
+          @click="navigateToProduct('ProductIntelligentQA')"
+        >
           <img
             src="@/assets/Home/8.png"
             alt="Intelligent Q&A System"
@@ -149,7 +155,10 @@
         </div>
 
         <!-- 第三张卡片：Enterprise Business Analysis -->
-        <div class="product-card">
+        <div 
+          class="product-card" 
+          @click="navigateToProduct('ProductBusinessAnalysis')"
+        >
           <img
             src="@/assets/Home/9.png"
             alt="Enterprise Business Analysis"
@@ -171,7 +180,10 @@
         </div>
 
         <!-- 第四张卡片：Manufacturing Digitalization -->
-        <div class="product-card">
+        <div 
+          class="product-card" 
+          @click="navigateToProduct('ProductManufacturing')"
+        >
           <img
             src="@/assets/Home/10.png"
             alt="Manufacturing Digitalization"
@@ -300,8 +312,15 @@ const featureImage = ref(featureImageSrc)
 
 // 路由跳转
 const router = useRouter()
+
+// 跳转到服务页面
 const navigateToServices = () => {
   router.push('/services')
+}
+
+// 跳转到产品页面
+const navigateToProduct = (productName) => {
+  router.push({ name: productName })
 }
 </script>
 
