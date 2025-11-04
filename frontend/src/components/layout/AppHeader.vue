@@ -20,6 +20,7 @@
           :key="item.path"
           :to="item.path"
           class="nav-link"
+          :class="{ 'nav-link-other-pages': !isHomeOrServices }"
         >
           {{ item.label }}
         </router-link>
@@ -48,13 +49,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
+import { useRoute } from 'vue-router'
 import logoImageSrc from '@/assets/kamfu.png'
 
 const { locale } = useI18n()
 const appStore = useAppStore()
+const route = useRoute()
 
 const logoImage = ref(logoImageSrc)
 
@@ -65,6 +68,11 @@ const navItems = [
   { label: 'About Us', path: '/about' },
   { label: 'Contact', path: '/contact' },
 ]
+
+// 判断是否在首页或Services页面
+const isHomeOrServices = computed(() => {
+  return route.path === '/' || route.path === '/services'
+})
 
 const setLanguage = (newLocale) => {
   locale.value = newLocale
@@ -127,6 +135,11 @@ const setLanguage = (newLocale) => {
   text-decoration: none;
   transition: color 0.3s ease;
   white-space: nowrap;
+}
+
+/* 其他页面（非首页和Services页面）的默认颜色 */
+.nav-link.nav-link-other-pages {
+  color: #666666;
 }
 
 .nav-link:hover {
