@@ -130,7 +130,7 @@ const setLanguage = (newLocale) => {
   font-family: 'PingFang SC', 'PingFang SC-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   text-align: center;
-  color: #ffffff;
+  color: #666666;
   line-height: 1.04vw;
   text-decoration: none;
   transition: color 0.3s ease;
@@ -165,7 +165,7 @@ const setLanguage = (newLocale) => {
   font-family: 'MiSans', 'MiSans-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   text-align: center;
-  color: #ffffff;
+  color: #666666;
   line-height: 0.83vw;
   background: transparent;
   border: none;
@@ -183,7 +183,7 @@ const setLanguage = (newLocale) => {
   font-size: 12px;
   font-family: 'MiSans', 'MiSans-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  color: #ffffff;
+  color: #666666;
   line-height: 0.83vw;
 }
 </style>
