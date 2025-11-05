@@ -117,16 +117,16 @@ const setLanguage = (newLocale) => {
 
 .nav-items {
   position: absolute;
-  left: 34.66%;
+  left: 45.41% ;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 61px;
+  gap: 3.18vw;
 }
 
 .nav-link {
-  font-size: 14px;
+  font-size: 0.9vw;
   font-family: 'PingFang SC', 'PingFang SC-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   text-align: center;
