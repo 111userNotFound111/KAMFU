@@ -218,7 +218,7 @@ const availability247Image = ref(availability247ImageSrc)
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 4.17vw; /* 80px at 1920px viewport - 添加底部间距 */
+  padding-bottom: 6.25vw; /* 80px at 1920px viewport - 添加底部间距 */
 }
 
 /* Exhibition Presenter 部分 */
