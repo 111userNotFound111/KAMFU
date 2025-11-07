@@ -161,7 +161,7 @@ const setLanguage = (newLocale) => {
 }
 
 .lang-option {
-  font-size: 12px;
+  font-size: 0.63vw;
   font-family: 'MiSans', 'MiSans-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   text-align: center;
@@ -180,7 +180,7 @@ const setLanguage = (newLocale) => {
 }
 
 .lang-separator {
-  font-size: 12px;
+  font-size: 0.63vw;
   font-family: 'MiSans', 'MiSans-Medium', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   color: #666666;
