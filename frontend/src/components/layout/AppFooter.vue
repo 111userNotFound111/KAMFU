@@ -141,7 +141,7 @@
 <style scoped>
 .footer-container {
   width: 100%;
-  height: 330px;
+  height: 17.19vw; /* 330px / 1920px = 17.19vw - 不受浏览器缩放影响 */
   background: #18191a;
   margin: 0 auto;
 }
@@ -154,9 +154,8 @@
 
 .footer-nav {
   display: flex;
-  padding-top: 60px;
-  padding-left: 15.68%;
-  /* 301px / 1920px = 15.68% - 所有分辨率等比缩放 */
+  padding-top: 3.125vw; /* 60px / 1920px = 3.125vw */
+  padding-left: 15.68vw; /* 301px / 1920px = 15.68vw */
 }
 
 .nav-column {
@@ -169,29 +168,25 @@
 }
 
 .nav-column:nth-child(2) {
-  margin-left: 13.18%;
-  /* 253px / 1920px = 13.18% */
+  margin-left: 13.18vw; /* 253px / 1920px = 13.18vw */
 }
 
 .nav-column:nth-child(3) {
-  margin-left: 13.44%;
-  /* 258px / 1920px = 13.44% */
+  margin-left: 13.44vw; /* 258px / 1920px = 13.44vw */
 }
 
 .nav-column:nth-child(4) {
-  margin-left: 13.33%;
-  /* 256px / 1920px = 13.33% */
+  margin-left: 13.33vw; /* 256px / 1920px = 13.33vw */
 }
 
 .nav-title {
-  font-size: clamp(16px, 1.04vw, 20px);
-  /* 20px at 1920px viewport */
+  font-size: 1.04vw; /* 20px / 1920px = 1.04vw - 纯视窗单位 */
   font-family: Impact, Impact-Regular, sans-serif;
   font-weight: 400;
   text-align: justify;
   color: #4059ff;
   line-height: 1.2;
-  margin: 0 0 24px 0;
+  margin: 0 0 1.25vw 0; /* 24px / 1920px = 1.25vw */
   white-space: nowrap;
 }
 
@@ -201,12 +196,11 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.625vw; /* 12px / 1920px = 0.625vw */
 }
 
 .nav-item {
-  font-size: clamp(12px, 0.73vw, 14px);
-  /* 14px at 1920px viewport */
+  font-size: 0.73vw; /* 14px / 1920px = 0.73vw - 纯视窗单位 */
   font-family: Helvetica, Helvetica-Regular, sans-serif;
   font-weight: 400;
   text-align: justify;
@@ -228,7 +222,7 @@
 
 .footer-divider {
   position: absolute;
-  bottom: 57px;
+  bottom: 2.97vw; /* 57px / 1920px = 2.97vw */
   left: 0;
   width: 100%;
   height: 1px;
@@ -240,19 +234,18 @@
 
 .footer-copyright {
   position: absolute;
-  bottom: 20px;
+  bottom: 1.04vw; /* 20px / 1920px = 1.04vw */
   left: 0;
   width: 100%;
-  font-size: clamp(12px, 0.73vw, 14px);
-  /* 14px at 1920px viewport */
+  font-size: 0.73vw; /* 14px / 1920px = 0.73vw - 纯视窗单位 */
   font-family: Helvetica, Helvetica-Regular, sans-serif;
   font-weight: 400;
   text-align: center;
   color: #ffffff;
   line-height: 1.21;
-  padding: 0 20px;
+  padding: 0 1.04vw; /* 20px / 1920px = 1.04vw */
   box-sizing: border-box;
 }
 
-/* 所有分辨率使用统一的百分比布局，等比缩放 */
+/* 使用纯视窗单位(vw)，不受浏览器 Ctrl+滚轮 缩放影响 */
 </style>

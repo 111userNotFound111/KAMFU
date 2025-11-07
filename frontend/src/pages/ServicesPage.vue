@@ -198,24 +198,24 @@ import developmentProcessImage from '@/assets/Service/Our Development Process.pn
 .services-title {
   margin: 0;
   padding: 0;
-  font-size: 88px;
+  font-size: 4.58vw; /* 88px / 1920px */
   font-family: Impact, Impact-Regular;
   font-weight: Regular;
   text-align: left;
   color: #ffffff;
-  line-height: 108px;
+  line-height: 5.625vw; /* 108px / 1920px */
   letter-spacing: 0.26px;
 }
 
 .services-subtitle {
   margin: 1.04vw 0 0 0;
   padding: 0;
-  font-size: 18px;
+  font-size: 0.9375vw; /* 18px / 1920px */
   font-family: PingFang SC, PingFang SC-Regular;
   font-weight: Regular;
   text-align: left;
   color: #ffffff;
-  line-height: 25px;
+  line-height: 1.302vw; /* 25px / 1920px */
   letter-spacing: 0px;
 }
 
@@ -309,9 +309,13 @@ import developmentProcessImage from '@/assets/Service/Our Development Process.pn
   width: 100%;
   margin: 0;
   padding: 0;
-  padding-top: 160px; /* Gap before the image */
-  /* Height: 160px gap + 600px image + 40px gap + 280px cards row1 + 40px gap + 280px cards row2 = 1400px */
-  min-height: 1400px;
+  padding-top: 12.5vw; /* Gap before the image: 240 = 12.5vw */
+  /* Height calculation (all in vw for responsive):
+     8.33vw (top gap) + 31.25vw (image) + 2.08vw (gap) + 
+     14.58vw (cards row1) + 2.08vw (gap) + 14.58vw (cards row2) + 
+     6.25vw (bottom gap) = 79.15vw */
+  min-height: 85.4vw; /* Fully responsive height */
+  padding-bottom: 6.25vw; /* 120px bottom gap before footer */
 }
 
 .process-image {
@@ -328,7 +332,7 @@ import developmentProcessImage from '@/assets/Service/Our Development Process.pn
 .process-section-title {
   position: absolute;
   left: 17.19vw; /* 330px */
-  top: calc(160px + 4.17vw); /* 160px padding-top + 80px from image top */
+  top: calc(12.5vw + 4.17vw); /* 8.33vw padding-top + 4.17vw (80px) from image top = 12.5vw */
   width: 26.67vw; /* 512px */
   height: 16.875vw; /* 324px */
   margin: 0;
@@ -340,7 +344,7 @@ import developmentProcessImage from '@/assets/Service/Our Development Process.pn
   color: #58381b;
   line-height: 5.625vw; /* 108px */
   letter-spacing: 0.26px;
-  white-space: pre-wrap;
+  white-space: normal;
   word-wrap: break-word;
 }
 
@@ -369,37 +373,37 @@ import developmentProcessImage from '@/assets/Service/Our Development Process.pn
 /* Orange Card 1 - Right of image, same top as image */
 .process-card-1 {
   left: calc(48.96vw + 2.08vw); /* 940px + 40px = 980px = 51.04vw */
-  top: 160px; /* Same as image top (padding-top) */
+  top: 12.5vw; /* Same as image top (padding-top) */
 }
 
 /* Orange Card 2 - Below Card 1 */
 .process-card-2 {
   left: calc(48.96vw + 2.08vw); /* 980px = 51.04vw */
-  top: calc(160px + 14.58vw + 2.08vw); /* 160px + 280px + 40px = 480px */
+  top: calc(12.5vw + 14.58vw + 2.08vw); /* 8.33vw + 280px + 40px = 24.99vw */
 }
 
 /* Orange Card 3 - Below image, 300px from left */
 .process-card-3 {
   left: 15.625vw; /* 300px */
-  top: calc(160px + 31.25vw + 2.08vw); /* 160px + 600px + 40px = 800px */
+  top: calc(12.5vw + 31.25vw + 2.08vw); /* 8.33vw + 600px + 40px = 41.66vw */
 }
 
 /* Orange Card 4 - Right of Card 3 */
 .process-card-4 {
   left: calc(15.625vw + 33.33vw + 2.08vw); /* 300px + 640px + 40px = 980px = 51.04vw */
-  top: calc(160px + 31.25vw + 2.08vw); /* 800px */
+  top: calc(12.5vw + 31.25vw + 2.08vw); /* 41.66vw */
 }
 
 /* Orange Card 5 - Below Card 3 */
 .process-card-5 {
   left: 15.625vw; /* 300px */
-  top: calc(160px + 31.25vw + 2.08vw + 14.58vw + 2.08vw); /* 160px + 600px + 40px + 280px + 40px = 1120px */
+  top: calc(12.5vw + 31.25vw + 2.08vw + 14.58vw + 2.08vw); /* 8.33vw + 600px + 40px + 280px + 40px = 58.32vw */
 }
 
 /* Orange Card 6 - Right of Card 5 */
 .process-card-6 {
   left: calc(15.625vw + 33.33vw + 2.08vw); /* 980px = 51.04vw */
-  top: calc(160px + 31.25vw + 2.08vw + 14.58vw + 2.08vw); /* 1120px */
+  top: calc(12.5vw + 31.25vw + 2.08vw + 14.58vw + 2.08vw); /* 58.32vw */
 }
 
 .process-card-title {
@@ -408,27 +412,27 @@ import developmentProcessImage from '@/assets/Service/Our Development Process.pn
   top: 2.60vw; /* 50px */
   margin: 0;
   padding: 0;
-  font-size: 36px;
+  font-size: 1.875vw; /* 36px / 1920px */
   font-family: Impact, Impact-Regular;
   font-weight: Regular;
   text-align: left;
   color: #FFBD3C;
-  line-height: 44px;
+  line-height: 2.29vw; /* 44px / 1920px */
 }
 
 .process-card-description {
   position: absolute;
   left: 2.60vw; /* 50px */
-  top: calc(2.60vw + 44px + 30px); /* 50px + 44px + 30px = 124px */
+  top: calc(2.60vw + 2.29vw + 1.56vw); /* 50px + 44px + 30px */
   width: 24.79vw;
   margin: 0;
   padding: 0;
-  font-size: 16px;
+  font-size: 0.833vw; /* 16px / 1920px */
   font-family: Helvetica, Helvetica-Regular;
   font-weight: Regular;
   text-align: left;
   color: #666666;
-  line-height: 20px;
+  line-height: 1.04vw; /* 20px / 1920px */
 }
 </style>
 
