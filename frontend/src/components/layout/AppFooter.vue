@@ -141,7 +141,6 @@
 <style scoped>
 .footer-container {
   width: 100%;
-  max-width: 1920px;
   height: 330px;
   background: #18191a;
   margin: 0 auto;
