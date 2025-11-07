@@ -209,7 +209,6 @@ const decisionSupportImage = ref(decisionSupportImageSrc)
 /* 描述文本 */
 .description-text {
   width: 68.7vw; /* 1319px at 1920px viewport */
-  height: 2.6vw; /* 50px at 1920px viewport */
   margin-top: 4.17vw; /* 80px at 1920px viewport - 圆角矩形下方间隔 */
   font-size: 0.94vw; /* 18px at 1920px viewport */
   font-family: PingFang SC, PingFang SC-Regular, sans-serif;
@@ -218,13 +217,12 @@ const decisionSupportImage = ref(decisionSupportImageSrc)
   color: #333333;
   line-height: 1.3vw; /* 25px at 1920px viewport */
   letter-spacing: 0;
+  margin-bottom: 2.08vw; /* 40px at 1920px viewport - 确保与下方内容的间隔 */
 }
 
-/* Exhibition Presenter 部分 */
-.exhibition-section {
+/* Knowledge Features 部分 */
+.knowledge-features-section {
   width: 68.7vw; /* 与圆角矩形同宽 */
-  /* 描述文本下方间隔 40px */
-  margin-top: 2.08vw; /* 40px at 1920px viewport */
 }
 
 /* 二级标题 */
@@ -256,7 +254,6 @@ const decisionSupportImage = ref(decisionSupportImageSrc)
 .modules-container {
   display: flex;
   gap: 2.03vw; /* 39px at 1920px viewport */
-  margin-top: 2.08vw; /* 40px at 1920px viewport */
 }
 
 /* 单个模块 */
@@ -277,7 +274,7 @@ const decisionSupportImage = ref(decisionSupportImageSrc)
   width: 21.56vw; /* 414px at 1920px viewport */
   height: 8.54vw; /* 164px at 1920px viewport */
   background: #3285ff;
-  margin-top: 1.04vw; /* 20px at 1920px viewport */
+  margin-top: 2.08vw; /* 40px at 1920px viewport */
   padding: 2.08vw; /* 40px at 1920px viewport */
   box-sizing: border-box;
 }

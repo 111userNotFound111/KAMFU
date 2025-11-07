@@ -256,7 +256,6 @@ const customReportsImage = ref(customReportsImageSrc)
 .modules-container {
   display: flex;
   gap: 2.03vw; /* 39px at 1920px viewport */
-  margin-top: 2.08vw; /* 40px at 1920px viewport */
 }
 
 /* 单个模块 */
@@ -277,7 +276,7 @@ const customReportsImage = ref(customReportsImageSrc)
   width: 21.56vw; /* 414px at 1920px viewport */
   height: 8.54vw; /* 164px at 1920px viewport */
   background: #3285ff;
-  margin-top: 1.04vw; /* 20px at 1920px viewport */
+  margin-top: 2.08vw; /* 40px at 1920px viewport */
   padding: 2.08vw; /* 40px at 1920px viewport */
   box-sizing: border-box;
 }
