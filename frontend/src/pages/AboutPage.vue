@@ -17,45 +17,64 @@
       
       <!-- Blue and Gray Rectangles Section -->
       <div class="info-section">
-        <!-- Blue Rectangle with Gray Rectangles Inside -->
-        <div class="blue-rectangle">
-          <div class="blue-content">
+        <!-- Three Interactive Rectangles -->
+        <div 
+          class="info-card" 
+          :class="{ 'expanded': activeCard === 0, 'collapsed': activeCard !== 0 }"
+          @click="setActiveCard(0)"
+        >
+          <div class="card-content">
             <h2 class="section-title">
               Our Mission
             </h2>
-            <p class="section-text">
+            <p
+              class="section-text"
+              :class="{ 'text-collapsed': activeCard !== 0 }"
+            >
               To empower businesses of all sizes with accessible, customized AI solutions that drive growth and innovation in the digital economy.
             </p>
           </div>
-          
-          <!-- Gray Rectangles Container (inside blue rectangle) -->
-          <div class="gray-rectangles">
-            <!-- First Gray Rectangle -->
-            <div class="gray-rectangle">
-              <div class="gray-content">
-                <h2 class="section-title">
-                  Multi-Media Support
-                </h2>
-                <p class="gray-text">
-                  To be the trusted AI partner for enterprises globally, known…
-                </p>
-              </div>
-            </div>
-            
-            <!-- Divider Line -->
-            <div class="divider-line" />
-            
-            <!-- Second Gray Rectangle -->
-            <div class="gray-rectangle">
-              <div class="gray-content">
-                <h2 class="section-title">
-                  24/7 Availability
-                </h2>
-                <p class="gray-text">
-                  Innovation, integrity, and impact drive everything we do. We…
-                </p>
-              </div>
-            </div>
+        </div>
+        
+        <!-- Divider Line 1 -->
+        <div class="divider-line" />
+        
+        <div 
+          class="info-card" 
+          :class="{ 'expanded': activeCard === 1, 'collapsed': activeCard !== 1 }"
+          @click="setActiveCard(1)"
+        >
+          <div class="card-content">
+            <h2 class="section-title">
+              Multi-Media Support
+            </h2>
+            <p
+              class="section-text"
+              :class="{ 'text-collapsed': activeCard !== 1 }"
+            >
+              To be the trusted AI partner for enterprises globally, known for delivering innovative solutions that transform businesses.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Divider Line 2 -->
+        <div class="divider-line" />
+        
+        <div 
+          class="info-card" 
+          :class="{ 'expanded': activeCard === 2, 'collapsed': activeCard !== 2 }"
+          @click="setActiveCard(2)"
+        >
+          <div class="card-content">
+            <h2 class="section-title">
+              24/7 Availability
+            </h2>
+            <p
+              class="section-text"
+              :class="{ 'text-collapsed': activeCard !== 2 }"
+            >
+              Innovation, integrity, and impact drive everything we do. We are committed to excellence in every project.
+            </p>
           </div>
         </div>
       </div>
@@ -119,6 +138,14 @@ import aboutImage2Src from '@/assets/About us_2.png'
 
 const aboutImage = ref(aboutImageSrc)
 const aboutImage2 = ref(aboutImage2Src)
+
+// 管理当前激活的卡片，默认第一个展开
+const activeCard = ref(0)
+
+// 设置激活的卡片
+const setActiveCard = (index) => {
+  activeCard.value = index
+}
 </script>
 
 <style scoped>
@@ -177,7 +204,7 @@ const aboutImage2 = ref(aboutImage2Src)
   letter-spacing: 0px;
 }
 
-/* Info Section - Blue and Gray Rectangles */
+/* Info Section - Interactive Cards */
 .info-section {
   position: absolute;
   bottom: 0;
@@ -189,37 +216,30 @@ const aboutImage2 = ref(aboutImage2Src)
   z-index: 15;
 }
 
-.blue-rectangle {
-  width: 68.75vw; /* 1320px / 1920px */
+.info-card {
   height: 9.58vw; /* 184px / 1920px */
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+/* 展开状态 - 蓝色矩形样式 */
+.info-card.expanded {
+  width: 39.58vw; /* 68.75vw - 29.17vw (缩短560px) */
   background: #3285ff;
-  position: relative;
-  flex-shrink: 0;
 }
 
-.blue-content {
-  padding-top: 2.08vw; /* 40px / 1920px */
-  padding-left: 2.08vw; /* 40px / 1920px */
-}
-
-.gray-rectangles {
-  display: flex;
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-}
-
-.gray-rectangle {
+/* 收缩状态 - 灰色矩形样式 */
+.info-card.collapsed {
   width: 14.58vw; /* 280px / 1920px */
-  height: 9.58vw; /* 184px / 1920px */
-  background: rgba(116, 116, 116, 0.7); /* #747474 with 0.7 opacity */
-  flex-shrink: 0;
+  background: rgba(116, 116, 116);
 }
 
-.gray-content {
+.card-content {
   padding-top: 2.08vw; /* 40px / 1920px */
   padding-left: 2.08vw; /* 40px / 1920px */
+  padding-right: 2.08vw; /* 40px / 1920px */
 }
 
 .divider-line {
@@ -241,8 +261,6 @@ const aboutImage2 = ref(aboutImage2Src)
 }
 
 .section-text {
-  width: 26.56vw; /* 510px / 1920px */
-  height: auto;
   margin: 0;
   margin-top: 1.04vw; /* 20px / 1920px */
   padding: 0;
@@ -252,20 +270,26 @@ const aboutImage2 = ref(aboutImage2Src)
   text-align: left;
   color: #ffffff;
   line-height: 1.04vw; /* 20px / 1920px */
+  transition: all 0.3s ease;
 }
 
-.gray-text {
+/* 展开状态下的文本样式 */
+.info-card.expanded .section-text {
+  width: 26.56vw; /* 510px / 1920px */
+  max-width: 26.56vw;
+  overflow: visible;
+  display: block;
+}
+
+/* 收缩状态下的文本样式 - 显示两行+省略号 */
+.section-text.text-collapsed {
   width: 10.42vw; /* 200px / 1920px */
-  height: 2.08vw; /* 40px / 1920px */
-  margin: 0;
-  margin-top: 1.04vw; /* 20px / 1920px */
-  padding: 0;
-  font-size: 0.73vw; /* 14px / 1920px */
-  font-family: Helvetica, Helvetica-Regular;
-  font-weight: normal;
-  text-align: left;
-  color: #ffffff;
-  line-height: 1.04vw; /* 20px / 1920px */
+  max-width: 10.42vw;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* OUR EXPERTISE Section */
