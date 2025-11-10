@@ -236,7 +236,7 @@
             >
             <div class="module-content">
               <h3 class="module-title">
-                Custom AI Agent Deve
+                Custom AI Agent Development
               </h3>
               <p class="module-subtitle">
                 Build intelligent AI agents that automate tasks, provide insights, and interact naturally with users for enhanced productivity
@@ -842,6 +842,14 @@ const navigateToProduct = (productName) => {
   position: absolute;
   width: 33.33vw; /* 640px / 1920px * 100 */
   z-index: 2; /* 显示在蓝色背景之上 */
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 平滑过渡动画 */
+}
+
+/* 服务模块 hover 效果 */
+.service-module:hover {
+  transform: translateY(-1.85vh) scale(1.02); /* 向上移动并整体放大 */
+  z-index: 10; /* hover 时提升到最顶层，避免被其他模块遮挡 */
 }
 
 /* 模块图片 */
@@ -850,6 +858,12 @@ const navigateToProduct = (productName) => {
   height: 31.48vh; /* 340px / 1080px * 100 */
   display: block;
   object-fit: cover;
+  transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 图片过渡效果 */
+}
+
+/* hover 时图片亮度提升 */
+.service-module:hover .module-image {
+  filter: brightness(1.05); /* 稍微提亮 */
 }
 
 /* 模块内容区域 */
@@ -860,6 +874,13 @@ const navigateToProduct = (productName) => {
   padding: 0;
   box-sizing: border-box;
   position: relative;
+  transition: box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* 阴影过渡动画 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 默认轻微阴影 */
+}
+
+/* hover 时增强阴影效果 */
+.service-module:hover .module-content {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25); /* 更强的阴影效果 */
 }
 
 /* 模块标题 */
@@ -867,12 +888,12 @@ const navigateToProduct = (productName) => {
   position: absolute;
   left: 1.56vw; /* 30px / 1920px * 100 */
   bottom: 7.96vh; /* 86px / 1080px * 100 */
-  font-size: 20px;
+  font-size: 1.04vw; /* 20px / 1920px * 100 */
   font-family: Impact, Impact-Regular;
   font-weight: 400;
   text-align: justify;
   color: #3285ff;
-  line-height: 24px;
+  line-height: 1.22vw; /* 24px / 1920px * 100 */
   margin: 0;
 }
 
@@ -883,12 +904,12 @@ const navigateToProduct = (productName) => {
   bottom: 2.78vh; /* 30px / 1080px * 100 (86px - 24px - 16px - 16px = 30px from bottom) */
   width: 30.21vw; /* 580px / 1920px * 100 */
   height: 3.70vh; /* 40px / 1080px * 100 */
-  font-size: 14px;
+  font-size: 0.73vw; /* 14px / 1920px * 100 */
   font-family: Helvetica, Helvetica-Regular;
   font-weight: 400;
   text-align: left;
   color: #0e3049;
-  line-height: 20px;
+  line-height: 1.04vw; /* 20px / 1920px * 100 */
   margin: 0;
 }
 
